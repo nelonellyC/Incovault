@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inco Cloud Vault - Ultimate Edition (1000 Levels!)</title>
+  <style>
+    /* ===== CLOUD THEME COLORS ===== */
+    :root {
+      --bg: #0a1628;
+      --text: #e8f4f8;
+      --accent1: #88d4ff;
+      --accent2: #5eb3e6;
+      --accent3: #c4e5ff;
+      --success: #7ee8a8;
+      --error: #ff8a9b;
+      --warning: #ffc870;
+      --cloud-white: #f0f8ff;
+      --soft-purple: #b8a8ff;
+      --gold: #ffd700;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #0a1628 0%, #1a3a5c 50%, #2d5a7b 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+      text-align: center;
+    }
+
+    /* Animated Cloud Background */
+    canvas#clouds {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    /* Floating Stars */
+    canvas#stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Top Bar Controls */
+    .top-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 3;
+      display: flex;
+      gap: 10px;
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(136, 212, 255, 0.3);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(136, 212, 255, 0.5);
+    }
+
+    /* Score Display */
+    .score-display {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 3;
+      background: rgba(240, 248, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: 20px;
+      border: 2px solid rgba(136, 212, 255, 0.4);
+      box-shadow: 0 8px 32px rgba(136, 212, 255, 0.2);
+    }
+
+    .score-display div {
+      font-size: 0.9rem;
+      margin: 3px 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Achievement Badge */
+    .achievement-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      z-index: 1001;
+      background: linear-gradient(135deg, var(--gold), #ffed4e);
+      padding: 30px 40px;
+      border-radius: 25px;
+      border: 4px solid white;
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.8);
+      text-align: center;
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .achievement-badge.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .achievement-badge h3 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .achievement-badge p {
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    /* Achievements Panel */
+    .achievements-panel {
+      position: absolute;
+      bottom: 90px;
+      left: 20px;
+      z-index: 3;
+      background: rgba(240, 248, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 20px;
+      border: 2px solid rgba(136, 212, 255, 0.4);
+      max-width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .achievements-panel.show {
+      display: block;
+    }
+
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      margin: 5px 0;
+      background: rgba(126, 232, 168, 0.1);
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .achievement-item.locked {
+      opacity: 0.4;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Theme Selector */
+    .theme-selector {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      background: rgba(240, 248, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 10px 15px;
+      border-radius: 15px;
+      border: 2px solid rgba(136, 212, 255, 0.4);
+    }
+
+    .theme-selector label {
+      color: var(--cloud-white);
+      font-size: 0.85rem;
+      margin-right: 8px;
+      font-weight: 600;
+    }
+
+    .theme-selector select {
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* Difficulty Selector */
+    .difficulty-selector {
+      position: absolute;
+      top: 110px;
+      left: 20px;
+      z-index: 3;
+      background: rgba(240, 248, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 10px;
+      border-radius: 15px;
+      border: 2px solid rgba(136, 212, 255, 0.4);
+    }
+
+    .difficulty-selector select {
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    /* Cloud Puzzle Box */
+    .puzzle-box {
+      background: rgba(240, 248, 255, 0.12);
+      backdrop-filter: blur(15px);
+      padding: 35px 30px;
+      border-radius: 30px;
+      box-shadow: 0 8px 32px rgba(136, 212, 255, 0.3), 
+                  inset 0 2px 20px rgba(255, 255, 255, 0.1);
+      width: 90%;
+      max-width: 450px;
+      z-index: 2;
+      position: relative;
+      border: 2px solid rgba(196, 229, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .puzzle-box:hover {
+      box-shadow: 0 12px 40px rgba(136, 212, 255, 0.4),
+                  inset 0 2px 25px rgba(255, 255, 255, 0.15);
+      transform: translateY(-3px);
+    }
+
+    .puzzle-box h2 {
+      margin-bottom: 12px;
+      font-size: 1.6rem;
+      color: var(--cloud-white);
+      text-shadow: 0 2px 10px rgba(136, 212, 255, 0.5);
+    }
+
+    .level-indicator {
+      font-size: 0.9rem;
+      color: var(--accent1);
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .puzzle-box > p:first-of-type {
+      margin-bottom: 15px;
+      font-size: 1rem;
+      opacity: 0.95;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Cloud Input Field */
+    #answer {
+      padding: 12px 15px;
+      width: 100%;
+      border: 2px solid rgba(136, 212, 255, 0.3);
+      border-radius: 15px;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(5px);
+      color: var(--cloud-white);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #answer:focus {
+      outline: none;
+      border-color: var(--accent1);
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 20px rgba(136, 212, 255, 0.4);
+    }
+
+    #answer::placeholder {
+      color: rgba(232, 244, 248, 0.6);
+    }
+
+    #answer:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Cloud Buttons */
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 11px 22px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      color: white;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(136, 212, 255, 0.3);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, var(--accent1), var(--accent3));
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(136, 212, 255, 0.5);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Message Display */
+    #message {
+      margin-top: 18px;
+      font-weight: bold;
+      font-size: 1rem;
+      min-height: 26px;
+      transition: color 0.3s ease;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    #maskCode {
+      margin-top: 12px;
+      color: var(--accent1);
+      font-size: 1.05rem;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      transition: opacity 1s ease;
+      line-height: 1.6;
+      text-shadow: 0 2px 10px rgba(136, 212, 255, 0.6);
+    }
+
+    #hint {
+      margin-top: 10px;
+      color: var(--warning);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      font-size: 0.95rem;
+      font-style: italic;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    #timer {
+      margin-top: 10px;
+      color: var(--warning);
+      font-weight: bold;
+      font-size: 1rem;
+      text-shadow: 0 2px 8px rgba(255, 200, 112, 0.5);
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(136, 212, 255, 0.2);
+      border-radius: 10px;
+      margin-top: 15px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent1), var(--accent3));
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 15px rgba(136, 212, 255, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      to { left: 100%; }
+    }
+
+    /* Cloud Mascot */
+    .mascot {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: cloudFloat 4s ease-in-out infinite;
+      filter: drop-shadow(0 5px 20px rgba(136, 212, 255, 0.4));
+      transition: all 0.6s ease;
+      z-index: 2;
+      max-width: 160px;
+    }
+
+    /* Cloud Animations */
+    @keyframes cloudFloat {
+      0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+      25% { transform: translateX(-50%) translateY(-12px) scale(1.02); }
+      50% { transform: translateX(-50%) translateY(-8px) scale(1.03); }
+      75% { transform: translateX(-50%) translateY(-15px) scale(1.01); }
+    }
+
+    @keyframes cloudDance {
+      0% { transform: translateX(-50%) rotate(0deg) scale(1); }
+      20% { transform: translateX(-50%) rotate(8deg) scale(1.1); }
+      40% { transform: translateX(-50%) rotate(-8deg) scale(1.12); }
+      60% { transform: translateX(-50%) rotate(8deg) scale(1.1); }
+      80% { transform: translateX(-50%) rotate(-5deg) scale(1.08); }
+      100% { transform: translateX(-50%) rotate(0deg) scale(1); }
+    }
+
+    @keyframes cloudGlow {
+      0%, 100% { filter: drop-shadow(0 5px 20px rgba(136, 212, 255, 0.4)) brightness(1); }
+      50% { filter: drop-shadow(0 8px 40px rgba(196, 229, 255, 0.8)) brightness(1.3); }
+    }
+
+    @keyframes cloudSpin {
+      0% { transform: translateX(-50%) rotate(0deg) scale(1.2); }
+      100% { transform: translateX(-50%) rotate(360deg) scale(1.2); }
+    }
+
+    @keyframes cloudBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-30px); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      50% { transform: translateX(6px); }
+      75% { transform: translateX(-6px); }
+      100% { transform: translateX(0); }
+    }
+
+    @keyframes flashRed {
+      0% { box-shadow: 0 0 30px rgba(255, 138, 155, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(255, 138, 155, 0.7); }
+      100% { box-shadow: 0 0 30px rgba(255, 138, 155, 0.3); }
+    }
+
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-500px) rotate(720deg); opacity: 0; }
+    }
+
+    /* Tutorial Overlay */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 22, 40, 0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .tutorial-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .tutorial-content {
+      background: linear-gradient(135deg, rgba(26, 58, 92, 0.98), rgba(45, 90, 123, 0.98));
+      border: 3px solid var(--accent1);
+      border-radius: 25px;
+      padding: 35px 30px;
+      max-width: 650px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 0 60px rgba(136, 212, 255, 0.5);
+      position: relative;
+      animation: slideIn 0.5s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .tutorial-content h2 {
+      color: var(--cloud-white);
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-align: center;
+      text-shadow: 0 0 20px rgba(136, 212, 255, 0.8);
+    }
+
+    .tutorial-section {
+      margin: 20px 0;
+      padding: 18px;
+      background: rgba(136, 212, 255, 0.08);
+      border-left: 4px solid var(--accent1);
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+    }
+
+    .tutorial-section h3 {
+      color: var(--accent1);
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 2px 8px rgba(136, 212, 255, 0.4);
+    }
+
+    .tutorial-section p, .tutorial-section ul {
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: var(--text);
+      margin: 10px 0;
+    }
+
+    .tutorial-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tutorial-section li {
+      padding: 8px 0;
+      padding-left: 28px;
+      position: relative;
+    }
+
+    .tutorial-section li:before {
+      content: "☁️";
+      position: absolute;
+      left: 5px;
+      font-size: 1rem;
+    }
+
+    .scoring-table {
+      width: 100%;
+      margin: 12px 0;
+      border-collapse: collapse;
+    }
+
+    .scoring-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(136, 212, 255, 0.3);
+    }
+
+    .scoring-table td:first-child {
+      color: var(--accent1);
+      font-weight: 600;
+    }
+
+    .tutorial-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 25px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tutorial-btn {
+      padding: 13px 28px;
+      border: none;
+      border-radius: 15px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .tutorial-btn.primary {
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      color: white;
+      box-shadow: 0 6px 20px rgba(136, 212, 255, 0.4);
+    }
+
+    .tutorial-btn.primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(136, 212, 255, 0.6);
+    }
+
+    .tutorial-btn.secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--cloud-white);
+      border: 2px solid var(--accent1);
+      backdrop-filter: blur(5px);
+    }
+
+    .tutorial-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .help-icon {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 55px;
+      height: 55px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(136, 212, 255, 0.5);
+    }
+
+    .help-icon:hover {
+      transform: scale(1.15) rotate(15deg);
+      box-shadow: 0 8px 30px rgba(136, 212, 255, 0.7);
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 14px;
+      background: rgba(136, 212, 255, 0.08);
+      border-radius: 12px;
+      backdrop-filter: blur(5px);
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .checkbox-container label {
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--cloud-white);
+    }
+
+    /* Achievements Button */
+    .achievements-btn {
+      position: absolute;
+      bottom: 90px;
+      right: 20px;
+      width: 55px;
+      height: 55px;
+      background: linear-gradient(135deg, var(--gold), #ffed4e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      z-index: 3;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .achievements-btn:hover {
+      transform: scale(1.15) rotate(-15deg);
+      box-shadow: 0 8px 30px rgba(255, 215, 0, 0.7);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .puzzle-box { padding: 28px 22px; }
+      .puzzle-box h2 { font-size: 1.4rem; }
+      button { padding: 9px 16px; font-size: 0.9rem; }
+      .mascot { max-width: 120px; bottom: 30px; }
+      .top-controls { top: 15px; right: 15px; }
+      .score-display, .difficulty-selector { font-size: 0.8rem; padding: 10px 14px; }
+      .tutorial-content { padding: 28px 22px; }
+      .theme-selector { top: 75px; left: 20px; transform: none; }
+      .achievements-panel { max-width: 200px; font-size: 0.8rem; }
+    }
+
+    @media (max-height: 650px) {
+      .mascot { bottom: 20px; max-width: 110px; }
+      .puzzle-box { padding: 22px 20px; }
+    }
+
+    /* Sound Effects Description */
+    .sound-info {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(240, 248, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 8px 15px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      color: var(--accent1);
+      opacity: 0.7;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated Cloud Background -->
+  <canvas id="clouds"></canvas>
+  
+  <!-- Floating Stars -->
+  <canvas id="stars"></canvas>
+
+  <!-- Achievement Badge Popup -->
+  <div class="achievement-badge" id="achievementBadge">
+    <h3 id="achievementTitle">🏆 Achievement Unlocked!</h3>
+    <p id="achievementDesc">Description</p>
+  </div>
+
+  <!-- Tutorial Overlay -->
+  <div class="tutorial-overlay" id="tutorialOverlay">
+    <div class="tutorial-content">
+      <h2>☁️ Inco Cloud Vault - Ultimate Edition</h2>
+      
+      <div class="tutorial-section">
+        <h3>🎯 Objective</h3>
+        <p>Guide Inco the Comfy Cloud through <strong>1000 LEVELS</strong> across 8 unique themes! Each level has a secret key. Unlock achievements, beat high scores, and become a Cloud Master!</p>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>🕹️ Controls</h3>
+        <ul>
+          <li><strong>Type your answer</strong> in the fluffy text box</li>
+          <li><strong>Press ENTER or click "Unlock"</strong> to submit</li>
+          <li><strong>Click "Hint"</strong> for a clue (costs 5 points)</li>
+          <li><strong>Click "Skip"</strong> to float to next level (costs 10 points)</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>📊 Scoring</h3>
+        <table class="scoring-table">
+          <tr>
+            <td>✅ Correct Answer:</td>
+            <td>100 pts × difficulty × theme</td>
+          </tr>
+          <tr>
+            <td>⚡ Time Bonus:</td>
+            <td>+2 pts per second left</td>
+          </tr>
+          <tr>
+            <td>🎯 Perfect Level (no hints):</td>
+            <td>+50 bonus points</td>
+          </tr>
+          <tr>
+            <td>🔥 Streak Bonus:</td>
+            <td>+10 pts per consecutive win</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>🎨 8 Epic Themes (1000 Levels Total!)</h3>
+        <ul>
+          <li><strong>🪙 Crypto:</strong> 125 blockchain & Web3 terms</li>
+          <li><strong>🎮 Gaming:</strong> 125 esports & gaming words</li>
+          <li><strong>💻 Tech:</strong> 125 technology & AI terms</li>
+          <li><strong>🌈 Mixed:</strong> 125 general challenges</li>
+          <li><strong>🔬 Science:</strong> 125 scientific terms</li>
+          <li><strong>🎵 Music:</strong> 125 music & audio terms</li>
+          <li><strong>🎬 Movies:</strong> 125 film & entertainment</li>
+          <li><strong>🏆 Sports:</strong> 125 sports & athletics</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>🏅 Achievements System</h3>
+        <p>Unlock <strong>20+ achievements</strong> including:</p>
+        <ul>
+          <li>First Victory, Speed Demon, Perfect 10</li>
+          <li>Theme Master, Century Club, Marathon Runner</li>
+          <li>No Hints Hero, Ultimate Cloud, and more!</li>
+        </ul>
+        <p><strong>Click the 🏆 button</strong> to view all achievements!</p>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>🎚️ Difficulty Modes</h3>
+        <ul>
+          <li><strong>Easy:</strong> 120 seconds, 1× score</li>
+          <li><strong>Medium:</strong> 90 seconds, 1.5× score</li>
+          <li><strong>Hard:</strong> 60 seconds, 2× score</li>
+          <li><strong>Extreme:</strong> 45 seconds, 3× score</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>💡 Pro Tips</h3>
+        <ul>
+          <li>Level descriptions contain clues!</li>
+          <li>Build streaks for bonus points</li>
+          <li>No penalty for wrong guesses</li>
+          <li>Complete themes to unlock rewards</li>
+          <li>Your progress auto-saves!</li>
+        </ul>
+      </div>
+
+      <div class="tutorial-section">
+        <h3>🎵 Sound Effects Guide</h3>
+        <p><strong>🎶 Background Music:</strong> Peaceful cloud ambience loop<br>
+        <strong>✅ Success Sound:</strong> Magical chime & sparkle effect<br>
+        <strong>❌ Fail Sound:</strong> Gentle whoosh (no harsh buzzer!)<br>
+        <strong>🏆 Achievement:</strong> Triumphant fanfare<br>
+        <strong>🔇 Mute:</strong> Toggle anytime with top-right button</p>
+      </div>
+
+      <div class="checkbox-container">
+        <input type="checkbox" id="dontShowAgain">
+        <label for="dontShowAgain">Don't show this tutorial again</label>
+      </div>
+
+      <div class="tutorial-buttons">
+        <button class="tutorial-btn primary" id="startGameBtn">☁️ Begin Cloud Adventure!</button>
+        <button class="tutorial-btn secondary" id="closeTutorialBtn">Maybe Later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Icon -->
+  <div class="help-icon" id="helpIcon" title="Show Tutorial">❓</div>
+
+  <!-- Achievements Button -->
+  <div class="achievements-btn" id="achievementsBtn" title="View Achievements">🏆</div>
+
+  <!-- Achievements Panel -->
+  <div class="achievements-panel" id="achievementsPanel">
+    <h3 style="color: var(--gold); margin-bottom: 10px; text-align: center;">🏆 Achievements</h3>
+    <div id="achievementsList"></div>
+  </div>
+
+  <!-- Top Controls -->
+  <div class="top-controls">
+    <button id="muteBtn" class="control-btn">🔈</button>
+    <button id="resetBtn" class="control-btn">🔄</button>
+  </div>
+
+  <!-- Theme Selector -->
+  <div class="theme-selector">
+    <label>🎨 Theme:</label>
+    <select id="themeSelect">
+      <option value="crypto">🪙 Crypto (125)</option>
+      <option value="gaming">🎮 Gaming (125)</option>
+      <option value="tech">💻 Tech (125)</option>
+      <option value="mixed">🌈 Mixed (125)</option>
+      <option value="science">🔬 Science (125)</option>
+      <option value="music">🎵 Music (125)</option>
+      <option value="movies">🎬 Movies (125)</option>
+      <option value="sports">🏆 Sports (125)</option>
+    </select>
+  </div>
+
+  <!-- Score Display -->
+  <div class="score-display">
+    <div>⭐ Score: <span id="score">0</span></div>
+    <div>🏆 Best: <span id="bestScore">0</span></div>
+    <div>🔥 Streak: <span id="streak">0</span></div>
+    <div>🎯 Completed: <span id="completed">0</span>/1000</div>
+  </div>
+
+  <!-- Difficulty Selector -->
+  <div class="difficulty-selector">
+    <label style="color: var(--cloud-white); font-size: 0.85rem;">☁️ Difficulty:</label><br>
+    <select id="difficultySelect">
+      <option value="easy">Easy (120s)</option>
+      <option value="medium" selected>Medium (90s)</option>
+      <option value="hard">Hard (60s)</option>
+      <option value="extreme">Extreme (45s)</option>
+    </select>
+  </div>
+
+  <!-- Main puzzle container -->
+  <div class="puzzle-box">
+    <h2>☁️ Inco Cloud Vault Ultimate</h2>
+    <div class="level-indicator">Level <span id="levelDisplay">1</span> of <span id="totalLevels">125</span> | Theme: <span id="currentTheme">Crypto</span></div>
+    <p id="description">Help Inco find the secret key floating in the clouds...</p>
+    
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <input 
+      type="text" 
+      id="answer" 
+      placeholder="Type the key..." 
+      autocomplete="off"
+    />
+    
+    <div class="button-group">
+      <button id="unlockBtn">🔓 Unlock</button>
+      <button id="hintBtn">💡 Hint (-5)</button>
+      <button id="skipBtn">⏭️ Skip (-10)</button>
+    </div>
+    
+    <p id="message">Inco floats peacefully, waiting for your answer...</p>
+    <p id="maskCode"></p>
+    <p id="hint"></p>
+    <p id="timer"></p>
+  </div>
+
+  <!-- Comfy Cloud Mascot -->
+  <img src="mascot.jpg" class="mascot" width="160" alt="Inco the Comfy Cloud" />
+
+  <!-- Sound Info -->
+  <div class="sound-info">🎵 Soft ambient music | ✨ Magical sound effects | 🔇 Mute anytime</div>
+
+  <!-- Audio elements -->
+  <audio id="bgMusic" src="bgmusic.mp3" preload="auto" loop></audio>
+  <audio id="unlockSound" src="unlock.mp3" preload="auto"></audio>
+  <audio id="failSound" src="fail.mp3" preload="auto"></audio>
+
+  <script>
+    // ===== PROCEDURAL LEVEL GENERATOR FOR 1000 LEVELS! =====
+    
+    // Base word banks for each theme (we'll expand these procedurally)
+    const WORD_BANKS = {
+      crypto: ['blockchain', 'bitcoin', 'ethereum', 'defi', 'nft', 'wallet', 'mining', 'staking', 'web3', 'dao', 'metaverse', 'token', 'coin', 'dapp', 'smart', 'contract', 'ledger', 'node', 'fork', 'hash', 'satoshi', 'altcoin', 'exchange', 'trading', 'hodl', 'pump', 'dump', 'whale', 'yield', 'farming', 'liquidity', 'pool', 'protocol', 'consensus', 'proof', 'stake', 'work', 'gas', 'fees', 'bridge', 'layer', 'scaling', 'rollup', 'sidechain', 'oracle', 'governance', 'treasury', 'airdrop', 'whitelist', 'mint', 'burn', 'supply', 'market', 'cap', 'volume', 'bullish', 'bearish', 'fomo', 'fud', 'dyor', 'wagmi', 'gm', 'ser', 'anon', 'based', 'ngmi', 'probably', 'nothing', 'alpha', 'beta', 'mainnet', 'testnet', 'genesis', 'block', 'chain', 'address', 'private', 'public', 'seed', 'phrase', 'custody', 'cold', 'hot', 'hardware', 'paper', 'multi', 'sig', 'sharding', 'validator', 'slashing', 'epoch', 'slot', 'finality', 'canonical', 'uncle', 'orphan', 'mempool', 'nonce', 'difficulty', 'reward', 'halving', 'emission', 'inflation', 'deflation', 'tokenomics', 'utility', 'security', 'equity', 'derivative', 'synthetic', 'wrapped', 'pegged', 'stable', 'algorithmic', 'collateral', 'overcollateralized', 'flash', 'loan', 'arbitrage', 'slippage', 'impermanent', 'loss'],
+      
+      gaming: ['esports', 'speedrun', 'moba', 'fps', 'rpg', 'mmo', 'loot', 'boss', 'raid', 'quest', 'respawn', 'spawn', 'console', 'controller', 'keyboard', 'mouse', 'achievement', 'trophy', 'platinum', 'multiplayer', 'coop', 'pvp', 'pve', 'streamer', 'twitch', 'youtube', 'gameplay', 'walkthrough', 'tutorial', 'guide', 'strategy', 'tactics', 'meta', 'nerf', 'buff', 'patch', 'update', 'dlc', 'expansion', 'season', 'battle', 'pass', 'skin', 'cosmetic', 'emote', 'taunt', 'finisher', 'execute', 'combo', 'juggle', 'cancel', 'frame', 'hitbox', 'hurtbox', 'invincible', 'iframes', 'dodge', 'parry', 'block', 'counter', 'crit', 'damage', 'dps', 'tank', 'healer', 'support', 'carry', 'jungle', 'lane', 'gank', 'farm', 'push', 'defend', 'objective', 'turret', 'tower', 'nexus', 'ancient', 'throne', 'barracks', 'creep', 'minion', 'champion', 'hero', 'legend', 'agent', 'operator', 'legend', 'hunter', 'guardian', 'titan', 'warlock', 'mage', 'warrior', 'rogue', 'ranger', 'paladin', 'druid', 'shaman', 'necromancer', 'summoner', 'enchanter', 'duelist', 'brawler', 'assassin', 'sniper', 'scout', 'medic', 'engineer', 'pilot', 'driver', 'racer', 'striker', 'goalkeeper', 'defender', 'midfielder', 'forward', 'captain'],
+      
+      tech: ['algorithm', 'data', 'structure', 'array', 'list', 'tree', 'graph', 'hash', 'table', 'queue', 'stack', 'heap', 'sort', 'search', 'binary', 'linear', 'recursion', 'iteration', 'loop', 'function', 'method', 'class', 'object', 'instance', 'inheritance', 'polymorphism', 'encapsulation', 'abstraction', 'interface', 'abstract', 'concrete', 'static', 'dynamic', 'compile', 'interpret', 'runtime', 'memory', 'pointer', 'reference', 'garbage', 'collection', 'leak', 'overflow', 'underflow', 'exception', 'error', 'debug', 'test', 'unit', 'integration', 'regression', 'deployment', 'production', 'staging', 'development', 'version', 'control', 'git', 'commit', 'branch', 'merge', 'pull', 'push', 'clone', 'fork', 'repository', 'remote', 'local', 'server', 'client', 'request', 'response', 'http', 'https', 'api', 'rest', 'graphql', 'endpoint', 'route', 'middleware', 'authentication', 'authorization', 'token', 'session', 'cookie', 'cache', 'cdn', 'load', 'balancer', 'proxy', 'firewall', 'encryption', 'decryption', 'cipher', 'key', 'certificate', 'ssl', 'tls', 'vpn', 'dns', 'ip', 'tcp', 'udp', 'port', 'socket', 'packet', 'bandwidth', 'latency', 'throughput', 'protocol', 'network', 'internet', 'intranet', 'extranet', 'lan', 'wan', 'wifi', 'ethernet', 'router', 'switch', 'hub'],
+      
+      mixed: ['innovation', 'digital', 'virtual', 'reality', 'augmented', 'mixed', 'cloud', 'edge', 'fog', 'computing', 'quantum', 'classical', 'parallel', 'distributed', 'centralized', 'decentralized', 'federated', 'peer', 'network', 'mesh', 'topology', 'architecture', 'design', 'pattern', 'framework', 'library', 'module', 'package', 'dependency', 'bundle', 'build', 'compile', 'transpile', 'minify', 'optimize', 'refactor', 'migrate', 'upgrade', 'downgrade', 'rollback', 'snapshot', 'backup', 'restore', 'sync', 'async', 'await', 'promise', 'callback', 'event', 'listener', 'handler', 'trigger', 'emit', 'broadcast', 'subscribe', 'publish', 'queue', 'worker', 'thread', 'process', 'task', 'job', 'cron', 'schedule', 'timer', 'interval', 'timeout', 'delay', 'throttle', 'debounce', 'buffer', 'stream', 'pipe', 'transform', 'filter', 'map', 'reduce', 'aggregate', 'group', 'sort', 'order', 'rank', 'score', 'weight', 'priority', 'index', 'key', 'value', 'pair', 'tuple', 'record', 'row', 'column', 'field', 'attribute', 'property', 'method', 'function', 'procedure', 'routine', 'subroutine', 'macro', 'script', 'batch', 'shell', 'terminal', 'console', 'command', 'argument', 'parameter', 'option', 'flag', 'switch', 'toggle', 'enable', 'disable', 'activate', 'deactivate'],
+      
+      science: ['atom', 'molecule', 'element', 'compound', 'mixture', 'solution', 'solvent', 'solute', 'reaction', 'catalyst', 'enzyme', 'protein', 'amino', 'acid', 'base', 'neutral', 'ph', 'ion', 'cation', 'anion', 'electron', 'proton', 'neutron', 'nucleus', 'orbital', 'shell', 'valence', 'bond', 'covalent', 'ionic', 'metallic', 'hydrogen', 'carbon', 'nitrogen', 'oxygen', 'periodic', 'table', 'group', 'period', 'metal', 'nonmetal', 'metalloid', 'halogen', 'noble', 'gas', 'alkali', 'alkaline', 'earth', 'transition', 'lanthanide', 'actinide', 'isotope', 'mass', 'weight', 'density', 'volume', 'pressure', 'temperature', 'energy', 'force', 'momentum', 'velocity', 'acceleration', 'friction', 'gravity', 'inertia', 'motion', 'newton', 'joule', 'watt', 'volt', 'ampere', 'ohm', 'coulomb', 'farad', 'henry', 'tesla', 'weber', 'circuit', 'current', 'voltage', 'resistance', 'capacitance', 'inductance', 'frequency', 'wavelength', 'amplitude', 'phase', 'wave', 'particle', 'photon', 'quantum', 'relativity', 'spacetime', 'black', 'hole', 'singularity', 'event', 'horizon', 'galaxy', 'star', 'planet', 'moon', 'comet', 'asteroid', 'meteor', 'nebula', 'quasar', 'pulsar', 'supernova', 'dwarf', 'giant', 'fusion', 'fission', 'radiation', 'decay', 'half', 'life'],
+      
+      music: ['melody', 'harmony', 'rhythm', 'tempo', 'beat', 'measure', 'bar', 'note', 'rest', 'pitch', 'tone', 'chord', 'scale', 'key', 'sharp', 'flat', 'natural', 'major', 'minor', 'octave', 'interval', 'unison', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'ninth', 'eleventh', 'thirteenth', 'triad', 'seventh', 'diminished', 'augmented', 'suspended', 'dominant', 'tonic', 'subdominant', 'mediant', 'submediant', 'leading', 'cadence', 'progression', 'modulation', 'transposition', 'inversion', 'voicing', 'arpeggio', 'glissando', 'vibrato', 'tremolo', 'staccato', 'legato', 'pizzicato', 'forte', 'piano', 'mezzo', 'crescendo', 'decrescendo', 'allegro', 'andante', 'adagio', 'presto', 'largo', 'moderato', 'vivace', 'lento', 'accelerando', 'ritardando', 'fermata', 'dynamics', 'articulation', 'phrasing', 'expression', 'timbre', 'texture', 'monophonic', 'polyphonic', 'homophonic', 'counterpoint', 'canon', 'fugue', 'sonata', 'symphony', 'concerto', 'suite', 'prelude', 'etude', 'nocturne', 'waltz', 'mazurka', 'polonaise', 'minuet', 'scherzo', 'rondo', 'theme', 'variation', 'movement', 'exposition', 'development', 'recapitulation', 'coda', 'bridge', 'verse', 'chorus', 'refrain', 'intro', 'outro', 'solo', 'ensemble', 'orchestra', 'band', 'choir', 'vocal', 'instrumental', 'acoustic', 'electric', 'amplifier', 'speaker', 'microphone', 'mixer', 'equalizer'],
+      
+      movies: ['director', 'producer', 'actor', 'actress', 'cast', 'crew', 'script', 'screenplay', 'dialogue', 'monologue', 'scene', 'shot', 'take', 'angle', 'camera', 'lens', 'focus', 'zoom', 'pan', 'tilt', 'dolly', 'crane', 'steadicam', 'handheld', 'tracking', 'establishing', 'closeup', 'medium', 'wide', 'overhead', 'aerial', 'pov', 'subjective', 'objective', 'montage', 'sequence', 'transition', 'cut', 'fade', 'dissolve', 'wipe', 'match', 'jump', 'cross', 'lighting', 'key', 'fill', 'back', 'three', 'point', 'natural', 'practical', 'ambient', 'motivated', 'color', 'temperature', 'contrast', 'exposure', 'aperture', 'shutter', 'speed', 'frame', 'rate', 'aspect', 'ratio', 'resolution', 'definition', 'format', 'codec', 'compression', 'rendering', 'editing', 'timeline', 'clip', 'trim', 'split', 'ripple', 'roll', 'slip', 'slide', 'audio', 'sound', 'foley', 'ambient', 'dialogue', 'music', 'score', 'soundtrack', 'theme', 'motif', 'leitmotif', 'diegetic', 'nondiegetic', 'mixing', 'dubbing', 'adr', 'subtitles', 'captions', 'visual', 'effects', 'practical', 'digital', 'cgi', 'greenscreen', 'bluescreen', 'compositing', 'rotoscoping', 'matte', 'painting', 'miniature', 'model', 'animation', 'motion', 'capture', 'performance', 'stunt', 'choreography', 'blocking'],
+      
+      sports: ['athlete', 'coach', 'trainer', 'referee', 'umpire', 'judge', 'player', 'team', 'squad', 'roster', 'lineup', 'formation', 'strategy', 'tactics', 'offense', 'defense', 'midfield', 'forward', 'striker', 'winger', 'midfielder', 'defender', 'fullback', 'sweeper', 'stopper', 'goalkeeper', 'keeper', 'goalie', 'captain', 'substitute', 'bench', 'reserve', 'starter', 'rookie', 'veteran', 'allstar', 'mvp', 'champion', 'winner', 'runner', 'medal', 'trophy', 'cup', 'title', 'league', 'division', 'conference', 'tournament', 'playoff', 'semifinal', 'final', 'match', 'game', 'bout', 'round', 'period', 'quarter', 'half', 'inning', 'set', 'frame', 'lap', 'heat', 'race', 'sprint', 'marathon', 'relay', 'hurdle', 'jump', 'vault', 'throw', 'shot', 'discus', 'javelin', 'hammer', 'pole', 'long', 'high', 'triple', 'track', 'field', 'court', 'pitch', 'field', 'rink', 'arena', 'stadium', 'gymnasium', 'pool', 'course', 'green', 'fairway', 'rough', 'bunker', 'hazard', 'tee', 'pin', 'hole', 'par', 'birdie', 'eagle', 'bogey', 'double', 'triple', 'albatross', 'ace', 'stroke', 'swing', 'putt', 'chip', 'pitch', 'drive', 'iron', 'wood', 'wedge', 'putter', 'club', 'ball', 'puck', 'disc']
+    };
+
+    // Generate 125 levels per theme with hints and descriptions
+    function generateLevels(theme, words) {
+      const levels = [];
+      const hints = {
+        crypto: ['blockchain technology', 'digital currency', 'smart contracts', 'decentralized finance', 'digital collectibles', 'crypto storage', 'coin creation', 'earning rewards', 'future internet', 'community governance', 'virtual world', 'digital asset', 'cryptocurrency', 'decentralized app'],
+        gaming: ['competitive play', 'fast completion', 'team battle arena', 'shooting game', 'role playing', 'massive multiplayer', 'treasure items', 'big enemy', 'group challenge', 'mission', 'come back to life', 'appear again', 'gaming device', 'input device'],
+        tech: ['problem solving steps', 'organized information', 'ordered collection', 'linked items', 'hierarchical structure', 'connected nodes', 'key-value storage', 'waiting line', 'last in first out', 'priority structure', 'arrange order', 'find items', 'two options', 'sequential'],
+        mixed: ['new creation', 'electronic form', 'not physical', 'simulated world', 'enhanced reality', 'combined tech', 'remote storage', 'network boundary', 'dispersed mist', 'processing power'],
+        science: ['smallest unit', 'chemical group', 'pure substance', 'combined elements', 'blended matter', 'dissolved mixture', 'dissolving liquid', 'dissolved substance', 'chemical process', 'reaction helper'],
+        music: ['tune sequence', 'chord progression', 'beat pattern', 'speed measure', 'pulse', 'time unit', 'musical section', 'sound symbol', 'silence mark', 'frequency'],
+        movies: ['film leader', 'film creator', 'performer', 'female performer', 'film team', 'production staff', 'written story', 'film writing', 'spoken words', 'single speech'],
+        sports: ['competitor', 'team leader', 'fitness expert', 'official', 'game judge', 'scorer', 'team member', 'sports group', 'player roster', 'team list']
+      };
+      
+      for (let i = 0; i < 125 && i < words.length; i++) {
+        levels.push({
+          key: words[i],
+          hint: `${hints[theme][i % hints[theme].length]} - ${words[i].length} letters`,
+          description: `Level ${i + 1}: Find the ${theme} term floating in the clouds...`
+        });
+      }
+      
+      return levels;
+    }
+
+    // ===== GAME THEMES WITH GENERATED LEVELS =====
+    const GAME_THEMES = {
+      crypto: {
+        name: "Crypto & Web3",
+        multiplier: 1.2,
+        levels: generateLevels('crypto', WORD_BANKS.crypto)
+      },
+      gaming: {
+        name: "Gaming & Esports",
+        multiplier: 1.3,
+        levels: generateLevels('gaming', WORD_BANKS.gaming)
+      },
+      tech: {
+        name: "Technology & AI",
+        multiplier: 1.1,
+        levels: generateLevels('tech', WORD_BANKS.tech)
+      },
+      mixed: {
+        name: "Mixed Challenge",
+        multiplier: 1.5,
+        levels: generateLevels('mixed', WORD_BANKS.mixed)
+      },
+      science: {
+        name: "Science & Physics",
+        multiplier: 1.2,
+        levels: generateLevels('science', WORD_BANKS.science)
+      },
+      music: {
+        name: "Music & Audio",
+        multiplier: 1.1,
+        levels: generateLevels('music', WORD_BANKS.music)
+      },
+      movies: {
+        name: "Film & Cinema",
+        multiplier: 1.2,
+        levels: generateLevels('movies', WORD_BANKS.movies)
+      },
+      sports: {
+        name: "Sports & Athletics",
+        multiplier: 1.3,
+        levels: generateLevels('sports', WORD_BANKS.sports)
+      }
+    };
+
+    // ===== ACHIEVEMENTS SYSTEM =====
+    const ACHIEVEMENTS = [
+      { id: 'first_win', name: 'First Victory', desc: 'Complete your first level', icon: '🎉', unlocked: false },
+      { id: 'speed_demon', name: 'Speed Demon', desc: 'Complete a level in under 10 seconds', icon: '⚡', unlocked: false },
+      { id: 'perfect_10', name: 'Perfect 10', desc: 'Complete 10 levels without hints', icon: '💯', unlocked: false },
+      { id: 'century_club', name: 'Century Club', desc: 'Complete 100 levels total', icon: '💯', unlocked: false },
+      { id: 'streak_master', name: 'Streak Master', desc: 'Get a 10-level win streak', icon: '🔥', unlocked: false },
+      { id: 'theme_master_crypto', name: 'Crypto Master', desc: 'Complete all Crypto levels', icon: '🪙', unlocked: false },
+      { id: 'theme_master_gaming', name: 'Gaming Legend', desc: 'Complete all Gaming levels', icon: '🎮', unlocked: false },
+      { id: 'theme_master_tech', name: 'Tech Guru', desc: 'Complete all Tech levels', icon: '💻', unlocked: false },
+      { id: 'high_scorer', name: 'High Scorer', desc: 'Score over 10,000 points', icon: '🏆', unlocked: false },
+      { id: 'no_hints', name: 'No Hints Hero', desc: 'Complete 50 levels without hints', icon: '🧠', unlocked: false },
+      { id: 'marathon', name: 'Marathon Runner', desc: 'Play for 1 hour straight', icon: '🏃', unlocked: false },
+      { id: 'perfect_score', name: 'Perfectionist', desc: 'Get max time bonus on a level', icon: '⭐', unlocked: false },
+      { id: 'comeback_kid', name: 'Comeback Kid', desc: 'Win with less than 5 seconds left', icon: '⏰', unlocked: false },
+      { id: 'explorer', name: 'Cloud Explorer', desc: 'Try all 8 themes', icon: '🌍', unlocked: false },
+      { id: 'legendary', name: 'Legendary', desc: 'Complete 500 levels', icon: '👑', unlocked: false },
+      { id: 'ultimate', name: 'Ultimate Cloud', desc: 'Complete all 1000 levels!', icon: '☁️', unlocked: false },
+      { id: 'extreme_master', name: 'Extreme Master', desc: 'Complete 10 levels on Extreme', icon: '💀', unlocked: false },
+      { id: 'wealthy', name: 'Cloud Millionaire', desc: 'Score over 50,000 points', icon: '💰', unlocked: false },
+      { id: 'dedicated', name: 'Dedicated Player', desc: 'Play on 7 different days', icon: '📅', unlocked: false },
+      { id: 'untouchable', name: 'Untouchable', desc: '20-level win streak', icon: '🛡️', unlocked: false }
+    ];
+
+    const GAME_CONFIG = {
+      difficulties: {
+        easy: { time: 120, scoreMultiplier: 1 },
+        medium: { time: 90, scoreMultiplier: 1.5 },
+        hard: { time: 60, scoreMultiplier: 2 },
+        extreme: { time: 45, scoreMultiplier: 3 }
+      },
+      
+      correctAnswerPoints: 100,
+      hintPenalty: 5,
+      skipPenalty: 10,
+      timeBonusPerSecond: 2,
+      streakBonus: 10,
+      perfectBonus: 50,
+      
+      victoryMessage: "☁️ <strong>Incredible! Theme Complete!</strong> ☁️<br>Inco is amazed by your cloud mastery! 🌈✨"
+    };
+
+    // ===== GAME STATE =====
+    let level = 1;
+    let bgStarted = false;
+    let timeLeft = 90;
+    let muted = false;
+    let timerInterval;
+    let score = 0;
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    let attempts = 0;
+    let currentDifficulty = 'medium';
+    let currentTheme = 'crypto';
+    let hintsUsed = 0;
+    let hintsUsedThisLevel = 0;
+    let tutorialShown = localStorage.getItem('tutorialShown') === 'true';
+    let streak = 0;
+    let levelsWithoutHints = 0;
+    let totalCompleted = parseInt(localStorage.getItem('totalCompleted')) || 0;
+    let startTime = Date.now();
+    let themesPlayed = JSON.parse(localStorage.getItem('themesPlayed') || '[]');
+    let achievements = JSON.parse(localStorage.getItem('achievements') || JSON.stringify(ACHIEVEMENTS));
+    let levelStartTime = 0;
+
+    // ===== DOM ELEMENTS =====
+    const inputEl = document.getElementById("answer");
+    const messageEl = document.getElementById("message");
+    const maskCodeEl = document.getElementById("maskCode");
+    const hintEl = document.getElementById("hint");
+    const timerEl = document.getElementById("timer");
+    const mascot = document.querySelector(".mascot");
+    const puzzleBox = document.querySelector(".puzzle-box");
+    const muteBtn = document.getElementById("muteBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const skipBtn = document.getElementById("skipBtn");
+    const scoreEl = document.getElementById("score");
+    const bestScoreEl = document.getElementById("bestScore");
+    const streakEl = document.getElementById("streak");
+    const completedEl = document.getElementById("completed");
+    const levelDisplayEl = document.getElementById("levelDisplay");
+    const totalLevelsEl = document.getElementById("totalLevels");
+    const currentThemeEl = document.getElementById("currentTheme");
+    const descriptionEl = document.getElementById("description");
+    const progressBar = document.getElementById("progressBar");
+    const difficultySelect = document.getElementById("difficultySelect");
+    const themeSelect = document.getElementById("themeSelect");
+    const achievementBadge = document.getElementById("achievementBadge");
+    const achievementTitle = document.getElementById("achievementTitle");
+    const achievementDesc = document.getElementById("achievementDesc");
+    const achievementsPanel = document.getElementById("achievementsPanel");
+    const achievementsList = document.getElementById("achievementsList");
+    const achievementsBtn = document.getElementById("achievementsBtn");
+    
+    // Tutorial elements
+    const tutorialOverlay = document.getElementById("tutorialOverlay");
+    const startGameBtn = document.getElementById("startGameBtn");
+    const closeTutorialBtn = document.getElementById("closeTutorialBtn");
+    const helpIcon = document.getElementById("helpIcon");
+    const dontShowAgain = document.getElementById("dontShowAgain");
+
+    // ===== AUDIO ELEMENTS =====
+    const bgMusic = document.getElementById("bgMusic");
+    const unlockSound = document.getElementById("unlockSound");
+    const failSound = document.getElementById("failSound");
+
+    // ===== INITIALIZE GAME =====
+    function init() {
+      bestScoreEl.textContent = bestScore;
+      completedEl.textContent = totalCompleted;
+      updateThemeInfo();
+      updateProgress();
+      setupEventListeners();
+      initParticles();
+      initClouds();
+      renderAchievements();
+      
+      if (!themesPlayed.includes(currentTheme)) {
+        themesPlayed.push(currentTheme);
+        localStorage.setItem('themesPlayed', JSON.stringify(themesPlayed));
+        checkAchievement('explorer');
+      }
+      
+      if (!tutorialShown) {
+        showTutorial();
+      } else {
+        startTimer();
+        setTimeout(() => inputEl.focus(), 300);
+      }
+    }
+
+    // ===== ACHIEVEMENTS =====
+    function checkAchievement(id) {
+      const achievement = achievements.find(a => a.id === id);
+      if (achievement && !achievement.unlocked) {
+        achievement.unlocked = true;
+        localStorage.setItem('achievements', JSON.stringify(achievements));
+        showAchievementPopup(achievement);
+        renderAchievements();
+      }
+    }
+
+    function showAchievementPopup(achievement) {
+      achievementTitle.textContent = `${achievement.icon} ${achievement.name}`;
+      achievementDesc.textContent = achievement.desc;
+      achievementBadge.classList.add('show');
+      
+      mascot.style.animation = "cloudSpin 1s ease-in-out";
+      
+      setTimeout(() => {
+        achievementBadge.classList.remove('show');
+        mascot.style.animation = "cloudFloat 4s ease-in-out infinite";
+      }, 3000);
+    }
+
+    function renderAchievements() {
+      achievementsList.innerHTML = achievements.map(a => `
+        <div class="achievement-item ${a.unlocked ? '' : 'locked'}">
+          <span style="font-size: 1.5rem;">${a.icon}</span>
+          <div>
+            <strong>${a.name}</strong><br>
+            <small>${a.desc}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleAchievementsPanel() {
+      achievementsPanel.classList.toggle('show');
+    }
+
+    // ===== TUTORIAL =====
+    function showTutorial() {
+      tutorialOverlay.classList.add('active');
+      clearInterval(timerInterval);
+    }
+
+    function hideTutorial() {
+      tutorialOverlay.classList.remove('active');
+      if (dontShowAgain.checked) {
+        localStorage.setItem('tutorialShown', 'true');
+        tutorialShown = true;
+      }
+      if (!timerInterval) startTimer();
+      setTimeout(() => inputEl.focus(), 300);
+    }
+
+    // ===== TIMER =====
+    function startTimer() {
+      const difficulty = GAME_CONFIG.difficulties[currentDifficulty];
+      timeLeft = difficulty.time;
+      levelStartTime = Date.now();
+      
+      timerInterval = setInterval(() => {
+        timerEl.textContent = `⏳ Time left: ${timeLeft}s`;
+        timeLeft--;
+        
+        if (timeLeft < 0) {
+          clearInterval(timerInterval);
+          gameOver();
+        }
+      }, 1000);
+    }
+
+    function gameOver() {
+      inputEl.disabled = true;
+      showMessage("⏱ Time's up! Click reset to try again.", "#ff8a9b");
+      unlockBtn.disabled = true;
+      hintBtn.disabled = true;
+      skipBtn.disabled = true;
+      streak = 0;
+      streakEl.textContent = streak;
+      updateBestScore();
+    }
+
+    // ===== AUDIO =====
+    function startBgMusic() {
+      if (!bgStarted) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(() => console.log("Audio blocked"));
+        bgStarted = true;
+      }
+    }
+
+    function toggleMute() {
+      muted = !muted;
+      bgMusic.muted = muted;
+      unlockSound.muted = muted;
+      failSound.muted = muted;
+      muteBtn.textContent = muted ? "🔇" : "🔈";
+    }
+
+    // ===== HINT SYSTEM =====
+    function showHint() {
+      startBgMusic();
+      const currentLevel = GAME_THEMES[currentTheme].levels[level - 1];
+      hintEl.textContent = `💡 ${currentLevel.hint}`;
+      hintEl.style.opacity = 1;
+      score = Math.max(0, score - GAME_CONFIG.hintPenalty);
+      hintsUsed++;
+      hintsUsedThisLevel++;
+      updateScore();
+      setTimeout(() => hintEl.style.opacity = 0, 5000);
+    }
+
+    // ===== SKIP LEVEL =====
+    function skipLevel() {
+      startBgMusic();
+      score = Math.max(0, score - GAME_CONFIG.skipPenalty);
+      updateScore();
+      streak = 0;
+      streakEl.textContent = streak;
+      
+      if (level < GAME_THEMES[currentTheme].levels.length) {
+        level++;
+        updateLevel();
+        showMessage("⏭️ Level skipped! -10 points", "#ffaa00");
+      } else {
+        completeTheme();
+      }
+    }
+
+    // ===== MESSAGES =====
+    function showMessage(text, color = "#e8f4f8") {
+      messageEl.textContent = text;
+      messageEl.style.color = color;
+    }
+
+    // ===== SCORING =====
+    function updateScore() {
+      scoreEl.textContent = score;
+      if (score > 10000) checkAchievement('high_scorer');
+      if (score > 50000) checkAchievement('wealthy');
+    }
+
+    function updateBestScore() {
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+        bestScoreEl.textContent = bestScore;
+      }
+    }
+
+    function updateProgress() {
+      const progress = ((level - 1) / GAME_THEMES[currentTheme].levels.length) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    function updateThemeInfo() {
+      totalLevelsEl.textContent = GAME_THEMES[currentTheme].levels.length;
+      currentThemeEl.textContent = GAME_THEMES[currentTheme].name;
+    }
+
+    // ===== LEVEL MANAGEMENT =====
+    function updateLevel() {
+      levelDisplayEl.textContent = level;
+      const currentLevel = GAME_THEMES[currentTheme].levels[level - 1];
+      descriptionEl.textContent = currentLevel.description;
+      inputEl.value = "";
+      inputEl.placeholder = `Type the cloud key for level ${level}...`;
+      hintsUsedThisLevel = 0;
+      updateProgress();
+      levelStartTime = Date.now();
+      inputEl.focus();
+    }
+
+    // ===== ANSWER CHECKING =====
+    function checkAnswer() {
+      startBgMusic();
+      if (timeLeft < 0) return;
+      
+      const userAnswer = inputEl.value.trim().toLowerCase();
+      const correctKey = GAME_THEMES[currentTheme].levels[level - 1].key;
+      
+      attempts++;
+      
+      if (!userAnswer) {
+        showMessage("❓ Please enter a key...", "#ffaa00");
+        return;
+      }
+      
+      if (userAnswer === correctKey) {
+        handleCorrectAnswer();
+      } else {
+        handleWrongAnswer();
+      }
+    }
+
+    function handleCorrectAnswer() {
+      const difficulty = GAME_CONFIG.difficulties[currentDifficulty];
+      const themeMultiplier = GAME_THEMES[currentTheme].multiplier;
+      const timeBonus = timeLeft * GAME_CONFIG.timeBonusPerSecond;
+      const streakBonus = streak * GAME_CONFIG.streakBonus;
+      const perfectBonus = hintsUsedThisLevel === 0 ? GAME_CONFIG.perfectBonus : 0;
+      const levelPoints = GAME_CONFIG.correctAnswerPoints * difficulty.scoreMultiplier * themeMultiplier;
+      
+      score += Math.floor(levelPoints + timeBonus + streakBonus + perfectBonus);
+      streak++;
+      if (hintsUsedThisLevel === 0) levelsWithoutHints++;
+      totalCompleted++;
+      
+      updateScore();
+      streakEl.textContent = streak;
+      completedEl.textContent = totalCompleted;
+      localStorage.setItem('totalCompleted', totalCompleted);
+      
+      // Check achievements
+      if (totalCompleted === 1) checkAchievement('first_win');
+      if (totalCompleted >= 100) checkAchievement('century_club');
+      if (totalCompleted >= 500) checkAchievement('legendary');
+      if (totalCompleted >= 1000) checkAchievement('ultimate');
+      if (streak >= 10) checkAchievement('streak_master');
+      if (streak >= 20) checkAchievement('untouchable');
+      if (levelsWithoutHints >= 10) checkAchievement('perfect_10');
+      if (levelsWithoutHints >= 50) checkAchievement('no_hints');
+      if (timeLeft >= 110) checkAchievement('speed_demon');
+      if (timeLeft <= 5) checkAchievement('comeback_kid');
+      if (timeLeft === difficulty.time - 1) checkAchievement('perfect_score');
+      if (currentDifficulty === 'extreme' && totalCompleted % 10 === 0) checkAchievement('extreme_master');
+      
+      showMessage(`🎉 Level ${level} Unlocked! +${Math.floor(levelPoints + timeBonus + streakBonus + perfectBonus)} points`, "#7ee8a8");
+      
+      mascot.style.animation = "cloudDance 0.5s ease-in-out infinite, cloudGlow 1.5s ease-in-out infinite";
+      unlockSound.currentTime = 0;
+      unlockSound.play().catch(() => {});
+      
+      if (level < GAME_THEMES[currentTheme].levels.length) {
+        maskCodeEl.textContent = `✅ Level ${level} cleared! 🔥 Streak: ${streak}`;
+        maskCodeEl.style.opacity = 1;
+        
+        setTimeout(() => {
+          level++;
+          updateLevel();
+          maskCodeEl.style.opacity = 0;
+          mascot.style.animation = "cloudFloat 4s ease-in-out infinite";
+        }, 2000);
+      } else {
+        completeTheme();
+      }
+    }
+
+    function completeTheme() {
+      clearInterval(timerInterval);
+      maskCodeEl.innerHTML = GAME_CONFIG.victoryMessage;
+      maskCodeEl.style.opacity = 1;
+      inputEl.disabled = true;
+      unlockBtn.disabled = true;
+      hintBtn.disabled = true;
+      skipBtn.disabled = true;
+      timerEl.textContent = "🎊 Theme Complete!";
+      updateBestScore();
+      
+      // Theme completion achievements
+      if (currentTheme === 'crypto') checkAchievement('theme_master_crypto');
+      if (currentTheme === 'gaming') checkAchievement('theme_master_gaming');
+      if (currentTheme === 'tech') checkAchievement('theme_master_tech');
+      
+      showMessage(`🏆 ${GAME_THEMES[currentTheme].name} Complete! Score: ${score}`, "#7ee8a8");
+      mascot.style.animation = "cloudBounce 0.8s ease-in-out infinite";
+    }
+
+    function handleWrongAnswer() {
+      showMessage("❌ Wrong key. Inco is confused! Try again...", "#ff8a9b");
+      mascot.style.animation = "cloudFloat 4s ease-in-out infinite";
+      puzzleBox.style.animation = "shake 0.3s, flashRed 0.3s";
+      setTimeout(() => puzzleBox.style.animation = "", 300);
+      failSound.currentTime = 0;
+      failSound.play().catch(() => {});
+      setTimeout(() => inputEl.value = "", 500);
+    }
+
+    // ===== RESET GAME =====
+    function resetGame() {
+      level = 1;
+      score = 0;
+      attempts = 0;
+      hintsUsed = 0;
+      hintsUsedThisLevel = 0;
+      streak = 0;
+      timeLeft = GAME_CONFIG.difficulties[currentDifficulty].time;
+      clearInterval(timerInterval);
+      inputEl.disabled = false;
+      unlockBtn.disabled = false;
+      hintBtn.disabled = false;
+      skipBtn.disabled = false;
+      maskCodeEl.style.opacity = 0;
+      hintEl.style.opacity = 0;
+      updateScore();
+      streakEl.textContent = streak;
+      updateThemeInfo();
+      updateLevel();
+      startTimer();
+      mascot.style.animation = "cloudFloat 4s ease-in-out infinite";
+      showMessage("Inco floats peacefully, waiting for your answer...", "#e8f4f8");
+    }
+
+    // ===== DIFFICULTY/THEME CHANGE =====
+    function changeDifficulty() {
+      currentDifficulty = difficultySelect.value;
+      resetGame();
+      showMessage(`Difficulty: ${currentDifficulty.toUpperCase()}`, "#ffaa00");
+    }
+
+    function changeTheme() {
+      currentTheme = themeSelect.value;
+      if (!themesPlayed.includes(currentTheme)) {
+        themesPlayed.push(currentTheme);
+        localStorage.setItem('themesPlayed', JSON.stringify(themesPlayed));
+        if (themesPlayed.length >= 8) checkAchievement('explorer');
+      }
+      resetGame();
+      showMessage(`Theme: ${GAME_THEMES[currentTheme].name}`, "#88d4ff");
+    }
+
+    // ===== EVENT LISTENERS =====
+    function setupEventListeners() {
+      unlockBtn.addEventListener("click", checkAnswer);
+      hintBtn.addEventListener("click", showHint);
+      skipBtn.addEventListener("click", skipLevel);
+      muteBtn.addEventListener("click", toggleMute);
+      resetBtn.addEventListener("click", resetGame);
+      difficultySelect.addEventListener("change", changeDifficulty);
+      themeSelect.addEventListener("change", changeTheme);
+      startGameBtn.addEventListener("click", hideTutorial);
+      closeTutorialBtn.addEventListener("click", hideTutorial);
+      helpIcon.addEventListener("click", showTutorial);
+      achievementsBtn.addEventListener("click", toggleAchievementsPanel);
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") checkAnswer();
+      });
+    }
+
+    // ===== CLOUD BACKGROUND =====
+    function initClouds() {
+      const canvas = document.getElementById('clouds');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const clouds = [];
+      
+      for (let i = 0; i < 8; i++) {
+        clouds.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 60 + 40,
+          speed: Math.random() * 0.3 + 0.1,
+          opacity: Math.random() * 0.15 + 0.05
+        });
+      }
+      
+      function animateClouds() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const cloud of clouds) {
+          cloud.x += cloud.speed;
+          if (cloud.x - cloud.radius > canvas.width) {
+            cloud.x = -cloud.radius;
+            cloud.y = Math.random() * canvas.height;
+          }
+          ctx.fillStyle = `rgba(196, 229, 255, ${cloud.opacity})`;
+          ctx.beginPath();
+          ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2);
+          ctx.arc(cloud.x + cloud.radius * 0.5, cloud.y - cloud.radius * 0.3, cloud.radius * 0.7, 0, Math.PI * 2);
+          ctx.arc(cloud.x - cloud.radius * 0.5, cloud.y - cloud.radius * 0.2, cloud.radius * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        requestAnimationFrame(animateClouds);
+      }
+      animateClouds();
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
+    // ===== STAR PARTICLES =====
+    function initParticles() {
+      const canvas = document.getElementById('stars');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const stars = [];
+      
+      for (let i = 0; i < 100; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.2,
+          speed: Math.random() * 0.2 + 0.05,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+      
+      function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const star of stars) {
+          star.y -= star.speed;
+          star.twinkle += 0.02;
+          if (star.y < 0) {
+            star.y = canvas.height;
+            star.x = Math.random() * canvas.width;
+          }
+          const opacity = (Math.sin(star.twinkle) + 1) / 2;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(196, 229, 255, ${opacity * 0.8})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(animateStars);
+      }
+      animateStars();
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
+    // ===== START GAME =====
+    window.addEventListener('load', init);
+  </script>
+
+</body>
+</html>
