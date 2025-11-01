@@ -98,6 +98,7 @@
       border-radius: 20px;
       border: 2px solid rgba(136, 212, 255, 0.4);
       box-shadow: 0 8px 32px rgba(136, 212, 255, 0.2);
+      min-width: 180px;
     }
 
     .score-display div {
@@ -211,24 +212,34 @@
     /* Difficulty Selector */
     .difficulty-selector {
       position: absolute;
-      top: 110px;
+      top: 140px;
       left: 20px;
       z-index: 3;
       background: rgba(240, 248, 255, 0.15);
       backdrop-filter: blur(10px);
-      padding: 10px;
+      padding: 10px 12px;
       border-radius: 15px;
       border: 2px solid rgba(136, 212, 255, 0.4);
+      min-width: 180px;
+    }
+
+    .difficulty-selector label {
+      color: var(--cloud-white);
+      font-size: 0.85rem;
+      margin-bottom: 5px;
+      display: block;
+      font-weight: 600;
     }
 
     .difficulty-selector select {
       background: linear-gradient(135deg, var(--accent2), var(--accent1));
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 6px 10px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.9rem;
+      width: 100%;
     }
 
     /* Cloud Puzzle Box */
@@ -710,15 +721,32 @@
       button { padding: 9px 16px; font-size: 0.9rem; }
       .mascot { max-width: 120px; bottom: 30px; }
       .top-controls { top: 15px; right: 15px; }
-      .score-display, .difficulty-selector { font-size: 0.8rem; padding: 10px 14px; }
+      .score-display { 
+        font-size: 0.8rem; 
+        padding: 10px 14px;
+        min-width: 150px;
+      }
+      .difficulty-selector { 
+        font-size: 0.8rem; 
+        padding: 8px 10px;
+        top: 120px;
+        min-width: 150px;
+      }
       .tutorial-content { padding: 28px 22px; }
-      .theme-selector { top: 75px; left: 20px; transform: none; }
+      .theme-selector { 
+        top: 75px; 
+        left: 20px; 
+        transform: none;
+        font-size: 0.85rem;
+      }
       .achievements-panel { max-width: 200px; font-size: 0.8rem; }
     }
 
     @media (max-height: 650px) {
       .mascot { bottom: 20px; max-width: 110px; }
       .puzzle-box { padding: 22px 20px; }
+      .score-display { top: 15px; }
+      .difficulty-selector { top: 115px; }
     }
 
     /* Sound Effects Description */
@@ -904,7 +932,7 @@
 
   <!-- Difficulty Selector -->
   <div class="difficulty-selector">
-    <label style="color: var(--cloud-white); font-size: 0.85rem;">☁️ Difficulty:</label><br>
+    <label>☁️ Difficulty:</label>
     <select id="difficultySelect">
       <option value="easy">Easy (120s)</option>
       <option value="medium" selected>Medium (90s)</option>
